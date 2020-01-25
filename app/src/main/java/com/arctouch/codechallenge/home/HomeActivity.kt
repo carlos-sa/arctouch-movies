@@ -1,28 +1,30 @@
 package com.arctouch.codechallenge.home
 
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutManager
 import android.view.View
+import android.widget.Toast
 import com.arctouch.codechallenge.R
-import com.arctouch.codechallenge.api.TmdbApi
 import com.arctouch.codechallenge.base.BaseActivity
-import com.arctouch.codechallenge.data.Cache
 import com.arctouch.codechallenge.model.Movie
 import com.arctouch.codechallenge.presenter.MoviesListContract
 import com.arctouch.codechallenge.presenter.MoviesListPresenter
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.home_activity.*
 
-class HomeActivity : BaseActivity(), MoviesListContract.view {
+class HomeActivity : BaseActivity(), MoviesListContract.View, OnLoadMore {
+
+    lateinit var moviesListPresenter: MoviesListPresenter
+    lateinit var infiniteScrollListener: OnInfiniteScrollListener
+    lateinit var moviesList: MutableList<Movie>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_activity)
 
-        var moviesListPresenter = MoviesListPresenter(this)
-        moviesListPresenter.loadMoviesList()
-    }
+        moviesListPresenter = MoviesListPresenter(this)
+        moviesListPresenter.loadMoviesPage()
 
+    }
 
     override fun showProgress() {
         progressBar.visibility = View.VISIBLE
@@ -32,7 +34,26 @@ class HomeActivity : BaseActivity(), MoviesListContract.view {
         progressBar.visibility = View.GONE
     }
 
+    override fun showErrorMessage(message:String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
     override fun showMoviesList(moviesList: List<Movie>) {
-        recyclerView.adapter = HomeAdapter(moviesList)
+
+            this.moviesList = moviesList.toMutableList()
+            val adapter = HomeAdapter(this.moviesList)
+            recyclerView.adapter = adapter
+            infiniteScrollListener = OnInfiniteScrollListener(
+                    recyclerView.layoutManager as LinearLayoutManager, adapter, this.moviesList, this)
+            recyclerView.addOnScrollListener(infiniteScrollListener)
+
+    }
+
+    override fun updateMoviesList(moviesList: List<Movie>) {
+        infiniteScrollListener.onPageLoaded(moviesList)
+    }
+
+    override fun loadMoreMovies() {
+        moviesListPresenter.loadMoviesPage()
     }
 }

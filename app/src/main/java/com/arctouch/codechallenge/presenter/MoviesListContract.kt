@@ -4,17 +4,21 @@ import com.arctouch.codechallenge.model.Movie
 
 interface MoviesListContract {
 
-    interface view {
+    interface View {
         fun showProgress()
 
         fun hideProgress()
 
         fun showMoviesList(moviesList: List<Movie>)
+
+        fun updateMoviesList(moviesList: List<Movie>)
+
+        fun showErrorMessage(message:String)
     }
 
-    interface presenter {
+    interface Presenter {
 
-        fun loadMoviesList()
+        fun loadMoviesPage()
     }
 
     interface OnMovieResponseCallback {
