@@ -1,9 +1,14 @@
 package com.arctouch.codechallenge.home
 
+import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import com.arctouch.codechallenge.R
@@ -16,6 +21,7 @@ import kotlinx.android.synthetic.main.home_activity.*
 class HomeActivity : AppCompatActivity(), MoviesListContract.View, OnLoadMore {
 
     private lateinit var moviesListPresenter: MoviesListPresenter
+    private val SCROLL_POSTION_TAG: String  = "POSTION_TAG"
     lateinit var infiniteScrollListener: OnInfiniteScrollListener
     lateinit var moviesList: MutableList<Movie>
 
@@ -23,9 +29,66 @@ class HomeActivity : AppCompatActivity(), MoviesListContract.View, OnLoadMore {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_activity)
 
-        moviesListPresenter = MoviesListPresenter(this)
-        moviesListPresenter.loadMoviesPage()
 
+        moviesListPresenter = MoviesListPresenter(this)
+
+        if (savedInstanceState != null) {
+            moviesListPresenter.onScreenRotate(savedInstanceState.getInt(SCROLL_POSTION_TAG))
+        } else {
+            moviesListPresenter.loadMoviesPage()
+        }
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.search_menu, menu)
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.search_button -> {
+                onSearchButton()
+                true
+            }
+            R.id.clear_button -> {
+                onClearButton()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun onClearButton() {
+        moviesListPresenter.onClearButton()
+    }
+
+    // Deal with received intents
+    private fun handleIntent(intent: Intent) {
+        if (Intent.ACTION_SEARCH == intent.action) {
+            doSearch(intent.getStringExtra(SearchManager.QUERY))
+        }
+    }
+
+    private fun onSearchButton() {
+        onSearchRequested() // Call search Widget
+    }
+
+    private fun doSearch(query: String) {
+        moviesListPresenter.onMovieSearch(query)
+    }
+    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+        outState?.putInt(SCROLL_POSTION_TAG, recyclerView.scrollState)
+        super.onSaveInstanceState(outState, outPersistentState)
     }
 
     override fun showProgress() {
@@ -53,6 +116,10 @@ class HomeActivity : AppCompatActivity(), MoviesListContract.View, OnLoadMore {
                     recyclerView.layoutManager as LinearLayoutManager, adapter, this.moviesList, this)
             recyclerView.addOnScrollListener(infiniteScrollListener)
 
+    }
+
+    override fun scrollMovieList(position: Int) {
+        recyclerView.scrollToPosition(position)
     }
 
     override fun updateMoviesList(moviesList: List<Movie>) {

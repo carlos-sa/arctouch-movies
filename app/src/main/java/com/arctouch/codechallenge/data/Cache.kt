@@ -9,12 +9,22 @@ object Cache {
 
     var movies = mutableListOf<Movie>()
 
+    var searchMovies = mutableListOf<Movie>()
+
     fun cacheGenres(genres: List<Genre>) {
         this.genres = genres
     }
 
     fun cacheMovies(movies: List<Movie>) {
         this.movies.addAll(movies)
+    }
+
+    fun cacheSearchMovies(movies: List<Movie>) {
+        this.searchMovies.addAll(movies)
+    }
+
+    fun clearSearchMovies() {
+        this.searchMovies.clear()
     }
 
     fun updateMoviesGenres() {

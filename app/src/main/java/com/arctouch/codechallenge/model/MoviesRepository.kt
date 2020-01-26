@@ -37,26 +37,56 @@ object MoviesRepository {
 
     fun loadMoviesPage(presenter: MoviesListContract.OnMovieResponseCallback, pageNumber: Long) {
         if (totalPages < pageNumber) {
-            presenter.onError("All the pages are already loaded")
+            presenter.onMovieListError("All the pages are already loaded")
         } else {
             api.upcomingMovies(TmdbApi.API_KEY, TmdbApi.DEFAULT_LANGUAGE, pageNumber, TmdbApi.DEFAULT_REGION)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe {
-                        val moviesWithGenres = it.results.map { movie ->
-                            movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
-                        }
+                        val moviesWithGenres = getMoviesWithGenres(it.results)
                         totalPages = it.totalPages
                         Cache.cacheMovies(moviesWithGenres)
-                        presenter.onResponse(moviesWithGenres)
+                        presenter.onMovieListResponse(moviesWithGenres)
                     }
         }
     }
 
-    fun loadMovieDetails(presenter: MoviesDetailsContract.OnMovieResponseCallback, id: Int) {
-        val movie = Cache.movies.find {it.id == id}
+    fun searchMoviesPage(presenter: MoviesListContract.OnSearchResponseCallback, searchQuery: String, page: Long) {
+        api.search(TmdbApi.API_KEY, TmdbApi.DEFAULT_LANGUAGE, page, searchQuery)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe{
+                    val moviesWithGenres = getMoviesWithGenres(it.results)
+                    Cache.cacheSearchMovies(moviesWithGenres)
+                    presenter.onSearchResponse(moviesWithGenres)
+                }
+
+
+    }
+
+    fun loadMovieDetails(presenter: MoviesDetailsContract.OnMovieResponseCallback,
+                         id: Int) {
+        var movie = Cache.movies.find {it.id == id}
+        if (movie === null) movie = Cache.searchMovies.find {it.id == id}
         if (movie !== null) presenter.onResponse(movie) else presenter.onError("There was an error fetching the movies details");
     }
 
+    fun loadCachedMovies(): MutableList<Movie> {
+        return Cache.movies
+    }
+
+    fun loadCachedSearchMovies(): MutableList<Movie> {
+        return Cache.searchMovies
+    }
+
+    fun clearSearchMovie() {
+        Cache.clearSearchMovies()
+    }
+
+    fun getMoviesWithGenres(movies: List<Movie>): List<Movie> {
+        return movies.map { movie ->
+            movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
+        }
+    }
 }
 

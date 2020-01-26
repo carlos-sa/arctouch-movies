@@ -11,6 +11,8 @@ interface MoviesListContract {
 
         fun showMoviesList(moviesList: List<Movie>)
 
+        fun scrollMovieList(position: Int)
+
         fun updateMoviesList(moviesList: List<Movie>)
 
         fun showErrorMessage(message:String)
@@ -19,11 +21,22 @@ interface MoviesListContract {
     interface Presenter {
 
         fun loadMoviesPage()
+
+        fun onScreenRotate(position: Int)
+
+        fun onMovieSearch(query: String)
+
+        fun onClearButton()
     }
 
     interface OnMovieResponseCallback {
 
-        fun onResponse(moviesList: List<Movie>)
-        fun onError(errorMessage: String)
+        fun onMovieListResponse(moviesList: List<Movie>)
+        fun onMovieListError(errorMessage: String)
+    }
+
+    interface OnSearchResponseCallback {
+        fun onSearchResponse(moviesList: List<Movie>)
+        fun onSearchError(errorMessage: String)
     }
 }
