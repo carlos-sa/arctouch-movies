@@ -2,18 +2,18 @@ package com.arctouch.codechallenge.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.widget.Toast
 import com.arctouch.codechallenge.R
-import com.arctouch.codechallenge.base.BaseActivity
 import com.arctouch.codechallenge.details.DetailsActivity
 import com.arctouch.codechallenge.model.Movie
 import com.arctouch.codechallenge.presenter.MoviesListContract
 import com.arctouch.codechallenge.presenter.MoviesListPresenter
 import kotlinx.android.synthetic.main.home_activity.*
 
-class HomeActivity : BaseActivity(), MoviesListContract.View, OnLoadMore {
+class HomeActivity : AppCompatActivity(), MoviesListContract.View, OnLoadMore {
 
     private lateinit var moviesListPresenter: MoviesListPresenter
     lateinit var infiniteScrollListener: OnInfiniteScrollListener

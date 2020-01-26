@@ -23,6 +23,18 @@ object MoviesRepository {
             .build()
             .create(TmdbApi::class.java)
 
+    init {
+
+        api.genres(TmdbApi.API_KEY, TmdbApi.DEFAULT_LANGUAGE)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    Cache.cacheGenres(it.genres)
+                    Cache.updateMoviesGenres()
+                }
+
+    }
+
     fun loadMoviesPage(presenter: MoviesListContract.OnMovieResponseCallback, pageNumber: Long) {
         if (totalPages < pageNumber) {
             presenter.onError("All the pages are already loaded")
