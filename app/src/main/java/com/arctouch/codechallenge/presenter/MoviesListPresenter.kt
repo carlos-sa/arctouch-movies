@@ -5,7 +5,7 @@ import com.arctouch.codechallenge.model.MoviesRepository
 
 class MoviesListPresenter(moviesView: MoviesListContract.View): MoviesListContract.Presenter, MoviesListContract.OnMovieResponseCallback {
 
-    private val moviesRepository: MoviesRepository = MoviesRepository()
+    private val moviesRepository: MoviesRepository = MoviesRepository
     private var page: Long = 1  // Stores the current Page number
     private var loading = false // To avoid reloading the same page
     private var moviesView = moviesView

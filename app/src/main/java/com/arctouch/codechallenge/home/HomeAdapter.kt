@@ -13,7 +13,9 @@ import kotlinx.android.synthetic.main.movie_item.view.*
 
 class HomeAdapter(private val movies: List<Movie>) : RecyclerView.Adapter<HomeAdapter.ViewHolder>() {
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    var onItemClick: ((Int) -> Unit)? = null
+
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val movieImageUrlBuilder = MovieImageUrlBuilder()
 
@@ -21,6 +23,10 @@ class HomeAdapter(private val movies: List<Movie>) : RecyclerView.Adapter<HomeAd
             itemView.titleTextView.text = movie.title
             itemView.genresTextView.text = movie.genres?.joinToString(separator = ", ") { it.name }
             itemView.releaseDateTextView.text = movie.releaseDate
+
+            itemView.setOnClickListener{
+                onItemClick?.invoke(movie.id)
+            }
 
             Glide.with(itemView)
                 .load(movie.posterPath?.let { movieImageUrlBuilder.buildPosterUrl(it) })
