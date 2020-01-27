@@ -52,7 +52,11 @@ class DetailsActivity: AppCompatActivity(), MoviesDetailsContract.View {
 
         genresTextView.text = movie?.genres?.joinToString(separator = ", ") { it.name }
         releaseDateTextView.text = movie?.releaseDate
-        overviewTextView.text = movie?.overview
+        if (!movie?.overview.isNullOrBlank()) {
+            overviewTextView.text = movie?.overview
+        } else {
+            overviewTextView.visibility = View.INVISIBLE
+        }
 
         Glide.with(this)
                 .load(movie?.backdropPath?.let { movieImageUrlBuilder.buildBackdropUrl(it) })
