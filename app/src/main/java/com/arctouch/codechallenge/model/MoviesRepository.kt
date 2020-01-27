@@ -58,7 +58,10 @@ object MoviesRepository {
                 .subscribe{
                     val moviesWithGenres = getMoviesWithGenres(it.results)
                     Cache.cacheSearchMovies(moviesWithGenres)
-                    presenter.onSearchResponse(moviesWithGenres)
+                    if (moviesWithGenres.isEmpty())
+                        presenter.onSearchError("No Movie Found for this Query.")
+                    else
+                        presenter.onSearchResponse(moviesWithGenres)
                 }
 
 
@@ -83,7 +86,7 @@ object MoviesRepository {
         Cache.clearSearchMovies()
     }
 
-    fun getMoviesWithGenres(movies: List<Movie>): List<Movie> {
+    private fun getMoviesWithGenres(movies: List<Movie>): List<Movie> {
         return movies.map { movie ->
             movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
         }

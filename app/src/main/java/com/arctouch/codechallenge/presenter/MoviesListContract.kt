@@ -27,6 +27,10 @@ interface MoviesListContract {
         fun onMovieSearch(query: String)
 
         fun onClearButton()
+
+        fun attachView(view: View)
+
+        fun deatachView()
     }
 
     interface OnMovieResponseCallback {

@@ -29,8 +29,7 @@ class HomeActivity : AppCompatActivity(), MoviesListContract.View, OnLoadMore {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_activity)
 
-
-        moviesListPresenter = MoviesListPresenter(this)
+        createViewPresenter()
 
         if (savedInstanceState != null) {
             moviesListPresenter.onScreenRotate(savedInstanceState.getInt(SCROLL_POSTION_TAG))
@@ -39,6 +38,22 @@ class HomeActivity : AppCompatActivity(), MoviesListContract.View, OnLoadMore {
         }
     }
 
+    override fun onDestroy() {
+        moviesListPresenter.deatachView()
+        super.onDestroy()
+    }
+
+    private fun createViewPresenter() {
+        if (lastCustomNonConfigurationInstance !== null) {
+            moviesListPresenter = lastCustomNonConfigurationInstance as MoviesListPresenter
+        } else
+            moviesListPresenter = MoviesListPresenter()
+        moviesListPresenter.attachView(this)
+    }
+
+    override fun onRetainCustomNonConfigurationInstance(): Any {
+        return moviesListPresenter
+    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
